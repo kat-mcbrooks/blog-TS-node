@@ -1,7 +1,5 @@
-import http from "http";
 import express from "express";
 import logging from "../config/logging";
-import config from "../config/config";
 import connectDB from "../config/db";
 import firebaseAdmin from "firebase-admin";
 const dotenv = require("dotenv").config();
