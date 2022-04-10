@@ -5,43 +5,19 @@ import config from "../config/config";
 import connectDB from "../config/db";
 import firebaseAdmin from "firebase-admin";
 const dotenv = require("dotenv").config();
+const port = process.env.PORT || 5000;
 
-const router = express();
-// Server Handling
-const httpServer = http.createServer(router);
+const app = express();
+
 // connect to Firebase on the Admin side in order to authenticate the token provided by the client side
 const serviceAccountKey = require("../config/serviceaccountkey.json");
 
 firebaseAdmin.initializeApp({
   credential: firebaseAdmin.credential.cert(serviceAccountKey),
 });
-// const atlas = process.env.ATLAS_URI;
-// Connect to Mongo
-
-connectDB();
-// mongoose
-//   .connect(
-//     `${process.env.ATLAS_URI}, {useNewUrlParser: true, useUnifiedTopology: true}`
-//   )
-//   .then((result) => {
-//     console.log(`MongoDB Connected: `);
-//   })
-//   .catch((error) => {
-//     logging.error(error);
-//   });
-
-// mongoose
-//   .connect(config.mongo.url, config.mongo.options)
-//   .then((result) => {
-//     logging.info("MongoDB Connected");
-//   })
-//   .catch((error) => {
-//     logging.error(error);
-//   });
 
 // logging middleware
-
-router.use((req, res, next) => {
+app.use((req, res, next) => {
   logging.info(
     `METHOD: [${req.method}] - URL: [${req.url}] - IP: [${req.socket.remoteAddress}]`
   );
@@ -56,11 +32,11 @@ router.use((req, res, next) => {
 });
 
 // Parse the body of the request. This allows the server to read the incoming requests and their body as json format
-router.use(express.urlencoded({ extended: true }));
-router.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // Rules of our API i.e. basically telling us where we are allowed to make requests from
-router.use((req, res, next) => {
+app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*"); // * so we can access this API from anwywhere
   res.header(
     "Access-Control-Allow-Headers",
@@ -78,7 +54,7 @@ router.use((req, res, next) => {
 //routes
 
 //error handling
-router.use((req, res, next) => {
+app.use((req, res, next) => {
   const error = new Error("Not found");
 
   res.status(404).json({
@@ -87,6 +63,11 @@ router.use((req, res, next) => {
 });
 
 // Listen for requests, 'turn on' server
-httpServer.listen(config.server.port, () =>
-  logging.info(`Server is running ${config.server.host}:${config.server.port}`)
-);
+app.listen(port, () => {
+  // Connect to Mongo (see config/db.ts)
+  connectDB();
+  console.log(`Server started on port ${port}`);
+});
+// httpServer.listen(config.server.port, () =>
+//   logging.info(`Server is running ${config.server.host}:${config.server.port}`)
+// );
