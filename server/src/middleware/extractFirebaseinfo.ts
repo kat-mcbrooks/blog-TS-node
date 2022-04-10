@@ -17,8 +17,8 @@ const extractFirebaseInfo = (
       .verifyIdToken(token)
       .then((result) => {
         if (result) {
-          res.locals.firebase = result;
-          res.locals.fire_token = token;
+          res.locals.firebase = result; // if there is a result, we add the result data to our response
+          res.locals.fire_token = token; //can also pass the token
           next();
         } else {
           logging.warn("Token invalid, Unauthorized");
@@ -37,8 +37,11 @@ const extractFirebaseInfo = (
         });
       });
   } else {
+    // else if the token does not exist:
     return res.status(401).json({
       message: "Unauthorized",
     });
   }
 };
+
+export default extractFirebaseInfo;
