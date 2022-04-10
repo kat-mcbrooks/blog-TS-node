@@ -2,28 +2,42 @@ import http from "http";
 import express from "express";
 import logging from "../config/logging";
 import config from "../config/config";
-import mongoose from "mongoose";
+import connectDB from "../config/db";
 import firebaseAdmin from "firebase-admin";
+const dotenv = require("dotenv").config();
 
 const router = express();
 // Server Handling
 const httpServer = http.createServer(router);
 // connect to Firebase on the Admin side in order to authenticate the token provided by the client side
-const serviceAccountKey = require("./config/serviceaccountkey.json");
+const serviceAccountKey = require("../config/serviceaccountkey.json");
 
 firebaseAdmin.initializeApp({
   credential: firebaseAdmin.credential.cert(serviceAccountKey),
 });
-
+// const atlas = process.env.ATLAS_URI;
 // Connect to Mongo
-mongoose
-  .connect(config.mongo.url, config.mongo.options)
-  .then((result) => {
-    logging.info("MongoDB Connected");
-  })
-  .catch((error) => {
-    logging.error(error);
-  });
+
+connectDB();
+// mongoose
+//   .connect(
+//     `${process.env.ATLAS_URI}, {useNewUrlParser: true, useUnifiedTopology: true}`
+//   )
+//   .then((result) => {
+//     console.log(`MongoDB Connected: `);
+//   })
+//   .catch((error) => {
+//     logging.error(error);
+//   });
+
+// mongoose
+//   .connect(config.mongo.url, config.mongo.options)
+//   .then((result) => {
+//     logging.info("MongoDB Connected");
+//   })
+//   .catch((error) => {
+//     logging.error(error);
+//   });
 
 // logging middleware
 
@@ -38,7 +52,7 @@ router.use((req, res, next) => {
     );
   });
 
-  next();
+  next(); //next is a function in express that allows the function to continue to the next piece of middleware. We have to put this, otherwise the request will get stuck here.
 });
 
 // Parse the body of the request. This allows the server to read the incoming requests and their body as json format
@@ -58,7 +72,7 @@ router.use((req, res, next) => {
     return res.status(200).json({});
   }
 
-  next();
+  next(); //
 });
 
 //routes
